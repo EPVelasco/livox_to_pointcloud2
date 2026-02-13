@@ -13,7 +13,9 @@
 namespace livox_to_pointcloud2 {
 
 LivoxToPointCloud2::LivoxToPointCloud2(const rclcpp::NodeOptions& options) : rclcpp::Node("livox_to_pointcloud2", options) {
-  points_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>("/livox/points", rclcpp::SensorDataQoS());
+ // points_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>("/livox/points", rclcpp::SensorDataQoS());
+auto qos_pub = rclcpp::QoS(rclcpp::KeepLast(5)).reliable();
+points_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>("/livox/points", qos_pub);
 
 #ifdef LIVOX_ROS2_DRIVER
   // livox_ros2_driver
@@ -27,7 +29,7 @@ LivoxToPointCloud2::LivoxToPointCloud2(const rclcpp::NodeOptions& options) : rcl
 #ifdef LIVOX_ROS_DRIVER2
   // livox_ros_driver2
   livox2_sub = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(
-    "/livox2/lidar",
+    "/livox/lidar",
     rclcpp::SensorDataQoS(),
     [this](const livox_ros_driver2::msg::CustomMsg::ConstSharedPtr livox_msg) {
       const auto points_msg = converter.convert(*livox_msg);
